@@ -1,3 +1,125 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use std::fs;
+use zed_extension_api::{self as zed};
+
+struct RuffExtension {
+    cached_binary_path: Option<String>,
 }
+
+impl RuffExtension {
+    fn language_server_binary_path(
+        &mut self,
+        language_server_id: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> zed::Result<String> {
+        if let Some(path) = worktree.which("ruff") {
+            println!("found ruff at {:?}", path);
+            return Ok(path);
+        }
+
+        if let Some(path) = &self.cached_binary_path {
+            if fs::metadata(path).map_or(false, |stat| stat.is_file()) {
+                println!("using cached ruff at {:?}", path);
+                return Ok(path.clone());
+            }
+        }
+
+        zed::set_language_server_installation_status(
+            language_server_id,
+            &zed_extension_api::LanguageServerInstallationStatus::CheckingForUpdate,
+        );
+
+        let release = zed::latest_github_release(
+            "astral-sh/ruff",
+            zed::GithubReleaseOptions {
+                require_assets: true,
+                pre_release: false,
+            },
+        )?;
+
+        let (platform, arch) = zed::current_platform();
+        let asset_name = format!(
+            "ruff-{arch}-{os}.{extension}",
+            arch = match arch {
+                zed::Architecture::Aarch64 => "aarch64",
+                zed::Architecture::X8664 => "x86_64",
+                zed::Architecture::X86 => "i686",
+            },
+            os = match platform {
+                zed::Os::Mac => "apple-darwin",
+                zed::Os::Linux => "unknown-linux-gnu",
+                zed::Os::Windows => "pc-windows-msvc",
+            },
+            extension = match platform {
+                zed::Os::Mac | zed::Os::Linux => "tar.gz",
+                zed::Os::Windows => "zip",
+            }
+        );
+
+        let asset = release
+            .assets
+            .iter()
+            .find(|asset| asset.name == asset_name)
+            .ok_or_else(|| format!("no asset found matching {:?}", asset_name))?;
+
+        let version_dir = format!("ruff-{}", release.version);
+        let asset_name = asset_name
+            .split('.')
+            .next()
+            .expect("failed to split asset name");
+        let binary_path: String = format!("{version_dir}/{asset_name}/ruff");
+
+        if !fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
+            zed::set_language_server_installation_status(
+                language_server_id,
+                &zed::LanguageServerInstallationStatus::Downloading,
+            );
+
+            zed::download_file(
+                &asset.download_url,
+                &version_dir,
+                match platform {
+                    zed::Os::Mac | zed::Os::Linux => zed::DownloadedFileType::GzipTar,
+                    zed::Os::Windows => zed::DownloadedFileType::Zip,
+                },
+            )
+            .map_err(|e| format!("failed to download file: {e}"))?;
+
+            zed::make_file_executable(&binary_path).expect("failed to make file executable");
+
+            let entries =
+                fs::read_dir(".").map_err(|e| format!("failed to list working directory {e}"))?;
+            for entry in entries {
+                let entry = entry.map_err(|e| format!("failed to load directory entry {e}"))?;
+                if entry.file_name().to_str() != Some(&version_dir) {
+                    fs::remove_dir_all(entry.path()).ok();
+                }
+            }
+        }
+
+        self.cached_binary_path = Some(binary_path.clone());
+        Ok(binary_path)
+    }
+}
+
+impl zed::Extension for RuffExtension {
+    fn new() -> Self {
+        Self {
+            cached_binary_path: None,
+        }
+    }
+
+    fn language_server_command(
+        &mut self,
+        language_server_id: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> zed::Result<zed::Command> {
+        println!("language_server_id: {:?} worktree: {:?}", language_server_id, worktree);
+        Ok(zed::Command {
+            command: self.language_server_binary_path(language_server_id, worktree)?,
+            args: vec!["server".to_owned(), "--preview".to_owned()],
+            env: vec![],
+        })
+    }
+}
+
+zed::register_extension!(RuffExtension);

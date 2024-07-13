@@ -7,5 +7,8 @@ description = "Zed plugin for Ruff https://github.com/astral-sh/ruff"
 repository = "https://github.com/0x6flab/zed-ruff"
 
 [language_servers.ruff]
+code_actions_kind = ["", "quickfix"]
 name = "Ruff Language Server"
 Language = "Python"
+languages = ["Python"]
+
