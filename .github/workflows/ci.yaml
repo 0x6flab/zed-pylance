@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check Dependencies
-        run: cargo check --release --all-targets --locked --verbose
+        run: cargo check --release --all-targets --verbose
 
       - name: Check formatting
         run: cargo fmt --all -- --check --verbose
