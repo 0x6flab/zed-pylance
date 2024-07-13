@@ -12,13 +12,11 @@ impl RuffExtension {
         worktree: &zed::Worktree,
     ) -> zed::Result<String> {
         if let Some(path) = worktree.which("ruff") {
-            println!("found ruff at {:?}", path);
             return Ok(path);
         }
 
         if let Some(path) = &self.cached_binary_path {
             if fs::metadata(path).map_or(false, |stat| stat.is_file()) {
-                println!("using cached ruff at {:?}", path);
                 return Ok(path.clone());
             }
         }
@@ -113,7 +111,6 @@ impl zed::Extension for RuffExtension {
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
     ) -> zed::Result<zed::Command> {
-        println!("language_server_id: {:?} worktree: {:?}", language_server_id, worktree);
         Ok(zed::Command {
             command: self.language_server_binary_path(language_server_id, worktree)?,
             args: vec!["server".to_owned(), "--preview".to_owned()],
