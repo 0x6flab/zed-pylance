@@ -1,0 +1,19 @@
+[package]
+name = "zed-pylance"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Zed plugin for Pylance https://github.com/microsoft/pylance-release"
+authors = ["Rodney Osodo <socials@rodneyosodo.com>"]
+license = "MIT"
+homepage = "https://github.com/0x6flab/zed-pylance"
+repository = "https://github.com/0x6flab/zed-pylance"
+documentation = "https://github.com/0x6flab/zed-pylance"
+readme = "README.md"
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.0.6"
