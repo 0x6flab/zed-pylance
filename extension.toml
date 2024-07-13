@@ -1,11 +1,11 @@
-id = "pylance"
-name = "Pylance"
+id = "ruff"
+name = "Ruff"
 version = "0.1.0"
 schema_version = 1
 authors = ["Rodney Osodo <socials@rodneyosodo.com>"]
-description = "Zed plugin for Pylance https://github.com/microsoft/pylance-release"
-repository = "https://github.com/0x6flab/zed-pylance"
+description = "Zed plugin for Ruff https://github.com/astral-sh/ruff"
+repository = "https://github.com/0x6flab/zed-ruff"
 
-[language_servers.pylance]
-name = "Pylance Language Server"
+[language_servers.ruff]
+name = "Ruff Language Server"
 Language = "Python"
