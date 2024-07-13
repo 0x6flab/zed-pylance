@@ -1,2 +1,3 @@
-# zed-pylance
-Pylance extension for zed
+# zed-ruff
+
+Ruff extension for zed

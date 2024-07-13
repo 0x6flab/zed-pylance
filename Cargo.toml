@@ -1,14 +1,14 @@
 [package]
-name = "zed-pylance"
+name = "zed-ruff"
 version = "0.1.0"
 edition = "2021"
 publish = false
-description = "Zed plugin for Pylance https://github.com/microsoft/pylance-release"
+description = "Zed plugin for Ruff https://github.com/astral-sh/ruff"
 authors = ["Rodney Osodo <socials@rodneyosodo.com>"]
 license = "MIT"
-homepage = "https://github.com/0x6flab/zed-pylance"
-repository = "https://github.com/0x6flab/zed-pylance"
-documentation = "https://github.com/0x6flab/zed-pylance"
+homepage = "https://github.com/0x6flab/zed-ruff"
+repository = "https://github.com/0x6flab/zed-ruff"
+documentation = "https://github.com/0x6flab/zed-ruff"
 readme = "README.md"
 
 [lib]
