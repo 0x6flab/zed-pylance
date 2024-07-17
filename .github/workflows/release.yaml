@@ -1,0 +1,19 @@
+name: Continuous Delivery
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Release Zed Extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bump version
+        uses: huacnlee/zed-extension-action@v1
+        with:
+          extension-name: ruff
+          push-to: rodneyosodo/extensions
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
